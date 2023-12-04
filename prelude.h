@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *read_to_string(const char *restrict fname);
-char *read_to_string(const char *restrict fname) {
+char *readToString(const char *restrict fname);
+char *readToString(const char *restrict fname) {
 	FILE *file = fopen(fname, "r");
 	if (!file) {
 		perror(fname);

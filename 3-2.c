@@ -148,7 +148,7 @@ int main(void) {
 		return 1;
 	}
 
-	printf("%zu\n", solve(read_to_string("3.txt")));
+	printf("%zu\n", solve(readToString("3.txt")));
 
 	return 0;
 }

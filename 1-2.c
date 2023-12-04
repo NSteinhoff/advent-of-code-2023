@@ -14,7 +14,7 @@ static const char *numbers[] = {
 	"five", "six", "seven", "eight", "nine",
 };
 
-static char get_digit(const char *text) {
+static char getDigit(const char *text) {
 	if (*text >= '0' && *text <= '9') {
 		return *text;
 	}
@@ -36,7 +36,7 @@ static int solve(const char *input) {
 		bool found_first = false;
 
 		while (*input && *input != '\n') {
-			const char digit = get_digit(input);
+			const char digit = getDigit(input);
 
 			if (digit >= 0) {
 				if (!found_first) {
@@ -66,7 +66,7 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Result: %d\n", solve(read_to_string("1.txt")));
+	printf("Result: %d\n", solve(readToString("1.txt")));
 
 	return 0;
 }

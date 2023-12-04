@@ -15,7 +15,7 @@ static const char *r = "red";
 static const char *g = "green";
 static const char *b = "blue";
 
-static void consume_word(const char **const input) {
+static void consumeWord(const char **const input) {
 	while (**input && **input != ' ' && **input != '\n') {
 		(*input)++;
 	}
@@ -24,20 +24,20 @@ static void consume_word(const char **const input) {
 	}
 }
 
-static const char *parse_color(const char **const input) {
+static const char *parseColor(const char **const input) {
 	const char *color = **input == 'r' ? r
 	                  : **input == 'g' ? g
 	                  : **input == 'b' ? b
 	                                   : NULL;
 
 	if (color) {
-		consume_word(input);
+		consumeWord(input);
 	}
 
 	return color;
 }
 
-static int parse_number(const char **const input) {
+static int parseNumber(const char **const input) {
 	int n = 0;
 
 	for (; **input && **input != ' ' && **input != '\n'; (*input)++) {
@@ -46,13 +46,13 @@ static int parse_number(const char **const input) {
 	}
 
 	if (n) {
-		consume_word(input);
+		consumeWord(input);
 	}
 
 	return n;
 }
 
-static void consume_line(const char **const input) {
+static void consumeLine(const char **const input) {
 	while (**input && **input != '\n') {
 		(*input)++;
 	}
@@ -62,7 +62,7 @@ static void consume_line(const char **const input) {
 	}
 }
 
-static int line_length(const char *input) {
+static int lineLength(const char *input) {
 	int len = 0;
 	for(; *input != '\n'; input++) {
 		len++;
@@ -83,23 +83,23 @@ static int solve(const char *input) {
 	for (int game = 1; *input; game++) {
 		if (verbose) {
 			printf("Game: %d: '%.*s'\n", game,
-			       line_length(input), input);
+			       lineLength(input), input);
 		}
 		bool impossible = false;
 
-		consume_word(&input); // "Game "
-		consume_word(&input); // "1: "
+		consumeWord(&input); // "Game "
+		consumeWord(&input); // "1: "
 
 		while (*input && !impossible && *input != '\n') {
 			if (verbose) {
 				printf("Draw: %.*s\n",
-				       line_length(input),
+				       lineLength(input),
 				       input);
 			}
 
-			const int n = parse_number(&input);
+			const int n = parseNumber(&input);
 			assert(n && "Unable to parse number!");
-			const char *const color = parse_color(&input);
+			const char *const color = parseColor(&input);
 			assert(color && "Unable to parse color!");
 
 			if (verbose) {
@@ -122,7 +122,7 @@ static int solve(const char *input) {
 			}
 
 			if (impossible || *input == '\n') {
-				consume_line(&input);
+				consumeLine(&input);
 				break;
 			}
 		}
@@ -143,6 +143,6 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Result: %d\n", solve(read_to_string("2.txt")));
+	printf("Result: %d\n", solve(readToString("2.txt")));
 	return 0;
 }

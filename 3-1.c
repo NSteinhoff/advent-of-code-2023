@@ -139,7 +139,7 @@ int main(void) {
 		return 1;
 	}
 
-	printf("%d\n", solve(read_to_string("3.txt")));
+	printf("%d\n", solve(readToString("3.txt")));
 
 	return 0;
 }
