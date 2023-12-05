@@ -46,3 +46,6 @@ js_%: %.js
 
 ts_%: %.ts
 	@ts-node $<
+
+%: %.c
+	@$(CC) $(CFLAGS) $< -o $@
