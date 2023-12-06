@@ -1,10 +1,19 @@
 #pragma once
 
+// Types
+#include <stddef.h>
+#include <stdint.h>
+
 #include <assert.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <ctype.h>
 #include <string.h>
+
+#define ASZ(A) sizeof(A) / sizeof(A[0])
 
 char *readToString(const char *restrict fname);
 char *readToString(const char *restrict fname) {

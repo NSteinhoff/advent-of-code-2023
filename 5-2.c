@@ -2,8 +2,6 @@
 #define MAX_SEEDS 32
 #define MAX_RANGES 64
 
-#define ASZ(A) sizeof(A) / sizeof(A[0])
-
 static const bool verbose = false;
 
 static const char *const example =
