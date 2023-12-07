@@ -15,6 +15,9 @@
 
 #define ASZ(A) sizeof(A) / sizeof(A[0])
 
+typedef unsigned char uchar;
+typedef unsigned int uint;
+
 char *readToString(const char *restrict fname);
 char *readToString(const char *restrict fname) {
 	FILE *file = fopen(fname, "r");
