@@ -13,7 +13,6 @@ def solve(lines):
     return 42
 
 
-
 actual = solve(example.split("\n"))
 assert actual == expected, f"expected {expected}, got {actual}"
 

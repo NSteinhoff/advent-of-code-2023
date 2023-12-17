@@ -8,15 +8,18 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 
 import math, re
 
+
 def f(line):
-    bag = {'r': 0, 'g': 0, 'b': 0}
+    bag = {"r": 0, "g": 0, "b": 0}
     id = re.match("Game (\d+):", line)[1]
     for n, c in re.findall("(\d+) (\w)", line):
         bag[c] = max(bag[c], int(n))
     return math.prod(bag.values())
 
+
 def solve(lines):
     return sum(map(f, lines))
+
 
 result = solve(example.split("\n"))
 assert result == 2286, f"expected 2286, got {result}"

@@ -10,7 +10,9 @@ from math import prod
 
 def solve(lines):
     ts, ds = [map(int, l.split()[1:]) for l in lines]
-    f = lambda t, d: next(t - 2 * tt + 1 for tt in range(t) if tt * (t - tt) > d)
+    f = lambda t, d: next(
+        t - 2 * tt + 1 for tt in range(t) if tt * (t - tt) > d
+    )
     return prod(map(f, ts, ds))
 
 

@@ -18,7 +18,10 @@ def solve(input):
     lines = input.split()
 
     coords = [
-        (x, y) for y, line in enumerate(lines) for x, c in enumerate(line) if c == "#"
+        (x, y)
+        for y, line in enumerate(lines)
+        for x, c in enumerate(line)
+        if c == "#"
     ]
 
     xs, ys = (set(cs) for cs in zip(*coords))

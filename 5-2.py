@@ -40,7 +40,7 @@ from functools import reduce
 
 
 def solve(input):
-    seeds, *mappings = input.strip().split('\n\n')
+    seeds, *mappings = input.strip().split("\n\n")
     seeds = list(map(int, seeds.split()[1:]))
 
     return min(reduce(lookup, mappings, zip(seeds[0::2], seeds[1::2])))[0]

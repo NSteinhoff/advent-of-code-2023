@@ -6,7 +6,9 @@ treb7uchet"""
 
 def solve(input):
     digits = (
-        [c for c in line if c.isdigit()] for line in input.split("\n") if len(line) > 0
+        [c for c in line if c.isdigit()]
+        for line in input.split("\n")
+        if len(line) > 0
     )
     numbers = (int(ds[0] + ds[-1]) for ds in digits)
     return sum(numbers)

@@ -7,10 +7,11 @@ Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
 Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 """.strip()
 
+
 def solve(lines):
     cards = [0.5] * len(lines)
     for i, line in enumerate(lines):
-        w, h = map(str.split, line.split('|'))
+        w, h = map(str.split, line.split("|"))
 
         for j in range(len(set(w) & set(h))):
             cards[i] *= 2

@@ -18,7 +18,10 @@ def solve(input):
     lines = input.split()
 
     coords = [
-        (x, y) for y, line in enumerate(lines) for x, c in enumerate(line) if c == "#"
+        (x, y)
+        for y, line in enumerate(lines)
+        for x, c in enumerate(line)
+        if c == "#"
     ]
 
     xs, ys = (set(cs) for cs in zip(*coords))
@@ -26,11 +29,17 @@ def solve(input):
 
     dists = zip(
         [
-            sum(1 if x in xs else 1_000_000 for x in range(min(x1, x2), max(x1, x2)))
+            sum(
+                1 if x in xs else 1_000_000
+                for x in range(min(x1, x2), max(x1, x2))
+            )
             for (x1, _), (x2, _) in pairs
         ],
         [
-            sum(1 if y in ys else 1_000_000 for y in range(min(y1, y2), max(y1, y2)))
+            sum(
+                1 if y in ys else 1_000_000
+                for y in range(min(y1, y2), max(y1, y2))
+            )
             for (_, y1), (_, y2) in pairs
         ],
     )

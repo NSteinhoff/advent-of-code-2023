@@ -25,12 +25,17 @@ def parse(line):
             yield int(c)
 
         parsed = next(
-            (digit for [digit, name] in digit_names if line[i : i + len(name)] == name),
+            (
+                digit
+                for [digit, name] in digit_names
+                if line[i : i + len(name)] == name
+            ),
             None,
         )
 
         if parsed is not None:
             yield parsed
+
 
 def numbers(input):
     for line in input.split("\n"):

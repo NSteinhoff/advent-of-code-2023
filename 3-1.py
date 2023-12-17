@@ -13,6 +13,7 @@ example = """
 
 import re
 
+
 def solve(lines):
     board = list(l.strip() for l in lines)
     chars = {

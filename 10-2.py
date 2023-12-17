@@ -73,7 +73,8 @@ def steps(grid, pos, prev):
             (
                 (r + i, c + j)
                 for i, j in edges[piece]
-                if (r + i, c + j) != prev and grid[r + i][c + j] in connections[(i, j)]
+                if (r + i, c + j) != prev
+                and grid[r + i][c + j] in connections[(i, j)]
             )
         )
         prev = r, c
@@ -87,7 +88,10 @@ def steps(grid, pos, prev):
 def solve(input):
     grid = input.split()
     r, c = next(
-        (i, j) for i, row in enumerate(grid) for j, c in enumerate(row) if c == "S"
+        (i, j)
+        for i, row in enumerate(grid)
+        for j, c in enumerate(row)
+        if c == "S"
     )
     directions = [
         (i, j)
@@ -107,9 +111,11 @@ def solve(input):
 
     return interior
 
+
 def shoelace(loop):
     pairs = list(zip(loop, loop[1:] + [loop[0]]))
     return abs(sum(x1 * y2 - y1 * x2 for (y1, x1), (y2, x2) in pairs))
+
 
 if __name__ == "__main__":
     result = solve(example)

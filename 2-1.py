@@ -9,10 +9,11 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 import math, re
 
 # 12 red cubes, 13 green cubes, and 14 blue cubes?
-limit = {'r': 12, 'g': 13, 'b': 14}
+limit = {"r": 12, "g": 13, "b": 14}
+
 
 def f(line):
-    bag = {'r': 0, 'g': 0, 'b': 0}
+    bag = {"r": 0, "g": 0, "b": 0}
     id = re.match("Game (\d+):", line)[1]
     for n, c in re.findall("(\d+) (\w)", line):
         bag[c] = max(bag[c], int(n))
@@ -20,8 +21,10 @@ def f(line):
         return int(id)
     return 0
 
+
 def solve(lines):
     return sum(map(f, lines))
+
 
 result = solve(example.split("\n"))
 assert result == 8, f"expected 8, got {result}"

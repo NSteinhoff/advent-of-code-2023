@@ -40,7 +40,8 @@ def steps(grid, pos, prev):
             (
                 (r + i, c + j)
                 for i, j in edges[piece]
-                if (r + i, c + j) != prev and grid[r + i][c + j] in connections[(i, j)]
+                if (r + i, c + j) != prev
+                and grid[r + i][c + j] in connections[(i, j)]
             )
         )
         prev = r, c
@@ -54,7 +55,10 @@ def steps(grid, pos, prev):
 def solve(input):
     grid = input.split()
     r, c = next(
-        (i, j) for i, row in enumerate(grid) for j, c in enumerate(row) if c == "S"
+        (i, j)
+        for i, row in enumerate(grid)
+        for j, c in enumerate(row)
+        if c == "S"
     )
     directions = [
         (i, j)
