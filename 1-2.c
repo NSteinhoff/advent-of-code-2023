@@ -15,46 +15,26 @@ static const char *numbers[] = {
 };
 
 static char getDigit(const char *text) {
-	if (*text >= '0' && *text <= '9') {
-		return *text;
-	}
-
-	for (unsigned char i = 0; i < 10; i++) {
-		if (!strncmp(text, numbers[i], strlen(numbers[i]))) {
+	if (isdigit(*text)) return *text;
+	for (unsigned char i = 0; i < ASZ(numbers); i++)
+		if (!strncmp(text, numbers[i], strlen(numbers[i])))
 			return '0' + i;
-		}
-	}
-
 	return -1;
 }
 
 static int solve(const char *input) {
 	int sum = 0;
-
 	while (*input) {
 		char digits[3] = {0};
-		bool found_first = false;
-
-		while (*input && *input != '\n') {
+		for (uint i = 0; *input && *input != '\n'; input++) {
 			const char digit = getDigit(input);
-
-			if (digit >= 0) {
-				if (!found_first) {
-					digits[0] = digit;
-					digits[1] = digit;
-					found_first = true;
-				} else {
-					digits[1] = digit;
-				}
-			}
-			input++;
+			if (digit < 0) continue;
+			if (!i) digits[i++] = digit;
+			digits[i] = digit;
 		}
-
 		sum += atoi(digits);
-		found_first = false;
 		input++;
 	}
-
 	return sum;
 }
 
@@ -62,11 +42,8 @@ int main(void) {
 	const int example_result = solve(example);
 	if (example_result != 281) {
 		printf("FAIL: expected 281 actual %d\n", example_result);
-
 		return 1;
 	}
-
 	printf("Result: %d\n", solve(readToString("1.txt")));
-
 	return 0;
 }

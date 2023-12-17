@@ -1,7 +1,5 @@
 #include "prelude.h"
 
-static const bool verbose = false;
-
 static const char *example =
 	"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\n"
 	"Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue\n"
@@ -11,127 +9,55 @@ static const char *example =
 
 static const int expected = 8;
 
-static const char *r = "red";
-static const char *g = "green";
-static const char *b = "blue";
+static const uchar limits[] = {
+	['r'] = 12,
+	['g'] = 13,
+	['b'] = 14,
+};
 
 static void consumeWord(const char **const input) {
-	while (**input && **input != ' ' && **input != '\n') {
-		(*input)++;
-	}
-	while (**input && **input == ' ') {
-		(*input)++;
-	}
+	while (**input && **input != ' ' && **input != '\n') (*input)++;
+	while (**input && **input == ' ') (*input)++;
 }
 
-static const char *parseColor(const char **const input) {
-	const char *color = **input == 'r' ? r
-	                  : **input == 'g' ? g
-	                  : **input == 'b' ? b
-	                                   : NULL;
-
-	if (color) {
-		consumeWord(input);
-	}
-
-	return color;
+static uchar parseColor(const char **const input) {
+	uchar c = (uchar) * *input;
+	consumeWord(input);
+	return c;
 }
 
 static int parseNumber(const char **const input) {
 	int n = 0;
-
 	for (; **input && **input != ' ' && **input != '\n'; (*input)++) {
 		n *= 10;
 		n += **input - '0';
 	}
-
-	if (n) {
-		consumeWord(input);
-	}
-
+	consumeWord(input);
 	return n;
 }
 
 static void consumeLine(const char **const input) {
-	while (**input && **input != '\n') {
-		(*input)++;
-	}
-
-	while (**input && **input == '\n') {
-		(*input)++;
-	}
-}
-
-static int lineLength(const char *input) {
-	int len = 0;
-	for(; *input != '\n'; input++) {
-		len++;
-	}
-	return len;
+	while (**input && **input != '\n') (*input)++;
+	while (**input && **input == '\n') (*input)++;
 }
 
 static int solve(const char *input) {
-	if (verbose) {
-		printf("Input:\n%s\n", input);
-	}
-
-	static const int r_max = 12;
-	static const int g_max = 13;
-	static const int b_max = 14;
-
 	int sum = 0;
 	for (int game = 1; *input; game++) {
-		if (verbose) {
-			printf("Game: %d: '%.*s'\n", game,
-			       lineLength(input), input);
-		}
 		bool impossible = false;
-
 		consumeWord(&input); // "Game "
 		consumeWord(&input); // "1: "
-
 		while (*input && !impossible && *input != '\n') {
-			if (verbose) {
-				printf("Draw: %.*s\n",
-				       lineLength(input),
-				       input);
-			}
-
 			const int n = parseNumber(&input);
-			assert(n && "Unable to parse number!");
-			const char *const color = parseColor(&input);
-			assert(color && "Unable to parse color!");
-
-			if (verbose) {
-				printf("Drew: %d %s\n", n, color);
-			}
-
-			const int max = color == r ? r_max
-			              : color == g ? g_max
-			              : color == b ? b_max
-			                           : 0;
-			assert(max && "Invalid color!");
-
-			if (n > max) {
-				if (verbose) {
-					printf("IMPOSSIBLE: %d %s > %d max\n",
-					       n, color, max);
-				}
-
-				impossible = true;
-			}
-
+			const uchar color = parseColor(&input);
+			if (n > limits[color]) impossible = true;
 			if (impossible || *input == '\n') {
 				consumeLine(&input);
 				break;
 			}
 		}
-
-		if (!impossible) {
-			sum += game;
-		}
+		if (!impossible) sum += game;
 	}
-
 	return sum;
 }
 
@@ -139,10 +65,8 @@ int main(void) {
 	const int actual = solve(example);
 	if (actual != expected) {
 		printf("FAIL: expected %d != actual %d\n", expected, actual);
-
 		return 1;
 	}
-
 	printf("Result: %d\n", solve(readToString("2.txt")));
 	return 0;
 }
