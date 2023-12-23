@@ -32,8 +32,13 @@ static int parseNumber(const char *const input, const char *cursor) {
 }
 
 static int sumNumbers(const char *const input, const char *cursor, int ncols) {
-	cursor -= ncols + 1; // up a row
-	cursor--;            // left one
+#define UP cursor -= ncols + 1
+#define DOWN cursor += ncols + 1
+#define LEFT cursor--
+#define RIGHT cursor++
+
+	UP;
+	LEFT;
 
 	const char *numbers[9];
 	int n_numbers = 0;
@@ -47,9 +52,10 @@ static int sumNumbers(const char *const input, const char *cursor, int ncols) {
 		if (inside && !isdigit(*cursor)) inside = false;
 		if ((i + 1) % 3 == 0) {
 			inside = false;
-			cursor += ncols + 1;
-			cursor -= 2;
-		} else cursor++;
+			DOWN;
+			LEFT;
+			LEFT;
+		} else RIGHT;
 	}
 	int sum = 0;
 	for (int i = 0; i < n_numbers; i++)

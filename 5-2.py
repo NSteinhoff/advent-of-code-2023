@@ -47,6 +47,7 @@ def solve(input):
 
 
 def lookup(inputs, mapping):
+    inputs = list(inputs)
     for start, length in inputs:
         while length > 0:
             for m in mapping.split("\n")[1:]:

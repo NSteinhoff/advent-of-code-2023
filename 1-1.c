@@ -10,7 +10,7 @@ static int solve(const char *input) {
 	int sum = 0;
 	while (*input) {
 		char digits[3] = {0};
-		for (uint i = 0; *input && *input != '\n'; input++) {
+		for (u32 i = 0; *input && *input != '\n'; input++) {
 			if (!isdigit(*input)) continue;
 			if (!i) digits[i++] = *input;
 			digits[i] = *input;

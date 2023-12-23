@@ -20,15 +20,6 @@ typedef enum {
 	CONTINUE_WINNER,
 } State;
 
-static bool isDigit(char c) {
-	return c >= '0' && c <= '9';
-}
-
-#define NEXT(S)                                                                \
-	do {                                                                   \
-		state = (S);                                                   \
-	} while (0)
-
 static int solve(char const *const input) {
 	static int numbers[MAX_NUMBERS], winners[MAX_WINNERS];
 	size_t n_numbers = 0;
@@ -45,39 +36,39 @@ static int solve(char const *const input) {
 				break;
 			}
 			if (*cursor == ':') {
-				NEXT(START_NUMBER);
+				state = START_NUMBER;
 				break;
 			}
 			break;
 		case START_NUMBER:
 			if (*cursor == '|') {
-				NEXT(START_WINNER);
+				state = START_WINNER;
 				break;
 			}
-			if (isDigit(*cursor)) {
+			if (isdigit(*cursor)) {
 				numbers[n_numbers++] = *cursor - '0';
-				NEXT(CONTINUE_NUMBER);
+				state = CONTINUE_NUMBER;
 				break;
 			}
 			break;
 		case CONTINUE_NUMBER:
 			if (*cursor == ' ') {
-				NEXT(START_NUMBER);
+				state = START_NUMBER;
 				break;
 			}
 			numbers[n_numbers - 1] *= 10;
 			numbers[n_numbers - 1] += *cursor - '0';
 			break;
 		case START_WINNER:
-			if (isDigit(*cursor)) {
+			if (isdigit(*cursor)) {
 				winners[n_winners++] = *cursor - '0';
-				NEXT(CONTINUE_WINNER);
+				state = CONTINUE_WINNER;
 				break;
 			}
 			break;
 		case CONTINUE_WINNER:
 			if (*cursor == ' ') {
-				NEXT(START_WINNER);
+				state = START_WINNER;
 				break;
 			}
 			if (*cursor == '\n') {
@@ -93,7 +84,7 @@ static int solve(char const *const input) {
 
 				sum += n_matches ? 1 << (n_matches - 1) : 0;
 
-				NEXT(START_CARD);
+				state = START_CARD;
 				break;
 			}
 			winners[n_winners - 1] *= 10;

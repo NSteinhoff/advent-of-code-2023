@@ -1,8 +1,8 @@
 #include "prelude.h"
-#define MAX_SEEDS 32
-#define MAX_RANGES 64
 
-static const bool verbose = false;
+#define MAX_SEEDS 32
+#define MAX_MAPPINGS 64
+#define MAX_STACK 128
 
 static const char *const example =
 	"seeds: 79 14 55 13\n"
@@ -39,146 +39,154 @@ static const char *const example =
 	"60 56 37\n"
 	"56 93 4\n";
 
-static const size_t expected = 46;
+static const i64 expected = 46;
 
 typedef struct {
-	size_t dst, src, len;
+	i64 dst, src, len;
+} Mapping;
+
+typedef struct {
+	i64 src, len;
 } Range;
 
 typedef struct {
 	const char *name;
 	size_t len;
-	Range ranges[MAX_RANGES];
+	Mapping mappings[MAX_MAPPINGS];
 } Map;
 
 typedef struct {
+	Range elements[MAX_STACK];
+	size_t len;
+} Stack;
+
+static const Range *pop(Stack *stack) {
+	assert(stack->len > 0);
+
+	return &stack->elements[--stack->len];
+}
+
+static void push(Stack *stack, const Range *range) {
+	assert(stack->len < ASZ(stack->elements));
+
+	stack->elements[stack->len++] = *range;
+}
+
+typedef struct {
 	size_t n_seeds;
-	size_t seeds[MAX_SEEDS][2];
+	Range seeds[MAX_SEEDS];
 	Map maps[7];
 } Almanac;
 
 typedef enum {
 	SEED_TITLE,
-	SEED_DST,
+	SEED_SRC,
 	SEED_LEN,
-	FIND_MAP,
-	MAP_TITLE,
-	RANGE_NEW,
-	RANGE_DST,
-	RANGE_SRC,
-	RANGE_LEN,
+	FIND_BLOCK,
+	BLOCK_TITLE,
+	MAPPING_NEW,
+	MAPPING_DST,
+	MAPPING_SRC,
+	MAPPING_LEN,
 } State;
 
-#define TRAN(S)                                                                \
-	do {                                                                   \
-		if (verbose)                                                   \
-			puts("\n\t> " #S);                                     \
-		state = (S);                                                   \
-	} while (0)
+#define MIN(A, B) (A) <= (B) ? (A) : (B)
+#define MAX(A, B) (A) >= (B) ? (A) : (B)
 
 static void parseAlmanac(char const *const input, Almanac *almanac) {
-	size_t n_maps = 0;
+	size_t n_blocks = 0;
 	almanac->n_seeds = 0;
 
 	State state = SEED_TITLE;
 	const char *cursor = input;
 
 	Map *map = NULL;
-	Range *range = NULL;
+	Mapping *mapping = NULL;
 	for (char c; (c = *cursor); cursor++) {
-		if (verbose) {
-			putchar(c);
-		}
-
 		switch (state) {
 		case SEED_TITLE:
 			if (c == ' ') {
-				almanac->seeds[almanac->n_seeds][0] = 0;
-				almanac->seeds[almanac->n_seeds][1] = 0;
-				almanac->n_seeds++;
-				TRAN(SEED_DST);
+				almanac->seeds[almanac->n_seeds++] = (Range){0};
+				state = SEED_SRC;
 				break;
 			}
 			break;
-		case SEED_DST:
+		case SEED_SRC: {
 			if (c == ' ') {
-				TRAN(SEED_LEN);
+				state = SEED_LEN;
 				break;
 			}
-			almanac->seeds[almanac->n_seeds - 1][0] *= 10;
-			almanac->seeds[almanac->n_seeds - 1][0] +=
-				(size_t)c - '0';
+			Range *seed = &almanac->seeds[almanac->n_seeds - 1];
+			seed->src *= 10;
+			seed->src += (size_t)c - '0';
 			break;
-		case SEED_LEN:
+		}
+		case SEED_LEN: {
 			if (c == ' ') {
-				almanac->seeds[almanac->n_seeds][0] = 0;
-				almanac->seeds[almanac->n_seeds][1] = 0;
-				almanac->n_seeds++;
-				TRAN(SEED_DST);
+				almanac->seeds[almanac->n_seeds++] = (Range){0};
+				state = SEED_SRC;
 				break;
 			}
 			if (c == '\n') {
-				TRAN(FIND_MAP);
+				state = FIND_BLOCK;
 				break;
 			}
-			almanac->seeds[almanac->n_seeds - 1][1] *= 10;
-			almanac->seeds[almanac->n_seeds - 1][1] +=
-				(size_t)c - '0';
+			Range *seed = &almanac->seeds[almanac->n_seeds - 1];
+			seed->len *= 10;
+			seed->len += (size_t)c - '0';
 			break;
-		case FIND_MAP:
+		}
+		case FIND_BLOCK:
 			if (c != '\n') {
-				map = &almanac->maps[n_maps++];
+				map = &almanac->maps[n_blocks++];
 				map->len = 0;
-				TRAN(MAP_TITLE);
+				state = BLOCK_TITLE;
 				break;
 			}
 			break;
-		case MAP_TITLE:
+		case BLOCK_TITLE:
 			if (c == '\n') {
-				TRAN(RANGE_NEW);
+				state = MAPPING_NEW;
 			}
 			break;
-		case RANGE_NEW:
+		case MAPPING_NEW:
 			if (c == '\n') {
-				TRAN(FIND_MAP);
+				state = FIND_BLOCK;
 				break;
 			}
 
-			assert(map);
-			range = &map->ranges[map->len++];
+			assert(map && map->len < MAX_MAPPINGS);
+			mapping = &map->mappings[map->len++];
+			*mapping = (Mapping){.dst = c - '0'};
 
-			range->dst = (size_t)c - '0';
-			range->src = 0;
-			range->len = 0;
-
-			TRAN(RANGE_DST);
+			state = MAPPING_DST;
 			break;
-		case RANGE_DST:
+		case MAPPING_DST:
 			if (c == ' ') {
-				TRAN(RANGE_SRC);
+				state = MAPPING_SRC;
 				break;
 			}
-			assert(range);
-			range->dst *= 10;
-			range->dst += (size_t)c - '0';
+			assert(mapping);
+			mapping->dst *= 10;
+			mapping->dst += (size_t)c - '0';
 			break;
-		case RANGE_SRC:
+		case MAPPING_SRC:
 			if (c == ' ') {
-				TRAN(RANGE_LEN);
+				state = MAPPING_LEN;
 				break;
 			}
-			assert(range);
-			range->src *= 10;
-			range->src += (size_t)c - '0';
+			assert(mapping);
+			mapping->src *= 10;
+			mapping->src += (size_t)c - '0';
 			break;
-		case RANGE_LEN:
+		case MAPPING_LEN:
 			if (c == '\n') {
-				TRAN(RANGE_NEW);
+				state = MAPPING_NEW;
 				break;
 			}
-			assert(range);
-			range->len *= 10;
-			range->len += (size_t)c - '0';
+			assert(mapping);
+			mapping->len *= 10;
+			mapping->len += (size_t)c - '0';
 			break;
 		}
 	}
@@ -187,57 +195,72 @@ static void parseAlmanac(char const *const input, Almanac *almanac) {
 static void printAlmanac(Almanac *almanac) {
 	printf("Seeds:\n");
 	for (size_t i = 0; i < almanac->n_seeds; i++) {
-		printf("- [%12zu:\n", almanac->seeds[i][0]);
-		printf("   %12zu]\n", almanac->seeds[i][1]);
+		Range *seed = almanac->seeds + i;
+		printf("[%lld:%lld]\n", seed->src, seed->len);
 	}
 	printf("Maps:\n");
 	for (size_t i = 0; i < ASZ(almanac->maps); i++) {
 		Map *map = &almanac->maps[i];
 		printf("  %s (%zu)\n", map->name, map->len);
 		for (size_t j = 0; j < map->len; j++) {
-			Range *range = &map->ranges[j];
-			printf("    [%zu:%zu:%zu]\n", range->dst, range->src,
+			Mapping *range = &map->mappings[j];
+			printf("    [%lld:%lld:%lld]\n", range->dst, range->src,
 			       range->len);
 		}
 	}
 }
 
-static size_t findLocation(Almanac *almanac) {
-	size_t location = 0;
+static i64 findLocation(Almanac *almanac) {
+	i64 loc = INT64_MAX;
 
-	for (size_t i = 0; i < almanac->n_seeds; i++) {
-		size_t start = almanac->seeds[i][0];
-		size_t end = start + almanac->seeds[i][1];
+	static Stack outputs;
+	for (size_t i = 0; i < almanac->n_seeds; i++)
+		push(&outputs, &almanac->seeds[i]);
 
-		for (size_t ii = start; ii < end; ii++) {
-			size_t next = ii;
+	for (size_t i = 0; i < ASZ(almanac->maps); i++) {
+		Map *map = &almanac->maps[i];
 
-			for (size_t j = 0; j < ASZ(almanac->maps); j++) {
-				Map *map = &almanac->maps[j];
-				for (size_t j = 0; j < map->len; j++) {
-					Range *range = &map->ranges[j];
+		static Stack inputs;
+		while (outputs.len) push(&inputs, pop(&outputs));
 
-					if (next < range->src ||
-					    next >= range->src + range->len) {
-						continue;
-					}
+		while (inputs.len) {
+			Range input = *pop(&inputs);
+			i64 s1 = input.src;
+			i64 e1 = input.src + input.len;
 
-					next = range->dst + (next - range->src);
+			bool overlap = false;
+			for (size_t i = 0; i < map->len; i++) {
+				Mapping *r = &map->mappings[i];
+				i64 s2 = r->src;
+				i64 e2 = r->src + r->len;
+				i64 delta = r->dst - r->src;
 
-					break;
-				}
+				i64 os = MAX(s1, s2);
+				i64 oe = MIN(e1, e2);
+				if (os >= oe) continue; // no overlap
+
+				push(&outputs, &(Range){os + delta, oe - os});
+				if (s1 < os)
+					push(&inputs, &(Range){s1, os - s1});
+				if (e1 > oe)
+					push(&inputs, &(Range){oe, e1 - oe});
+
+				overlap = true;
+				break;
 			}
-
-			if (!location || location > next) {
-				location = next;
-			}
+			if (!overlap) push(&outputs, &input);
 		}
 	}
 
-	return location;
+	while (outputs.len) {
+		i64 src = pop(&outputs)->src;
+		if (src < loc) loc = src;
+	}
+
+	return loc;
 }
 
-static size_t solve(char const *const input) {
+static i64 solve(char const *const input) {
 	static Almanac almanac = {
 		.n_seeds = 0,
 		.maps = {
@@ -258,15 +281,16 @@ static size_t solve(char const *const input) {
 }
 
 int main(void) {
-	const size_t actual = solve(example);
+	const i64 actual = solve(example);
 
 	if (actual != expected) {
-		printf("FAIL: expected %zu != actual %zu\n", expected, actual);
+		printf("FAIL: expected %lld != actual %lld\n", expected,
+		       actual);
 
 		return 1;
 	}
 
-	/* printf("Result: %zu\n", solve(readToString("5.txt"))); */
+	printf("Result: %lld\n", solve(readToString("5.txt")));
 
 	return 0;
 }

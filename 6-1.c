@@ -14,26 +14,25 @@ typedef struct {
 
 static int solve(const char *input) {
 	static Race races[MAX_RACES];
-	uint8_t n_races = 0;
+	u8 n_races = 0;
 
 	size_t len = strcspn(input, "\n");
 	const char *times = input;
 	const char *distances = input + len + 1;
 
-	while(*times != ' ' && *times != '\n') times++;
-	while(*distances != ' ' && *distances != '\n') distances++;
+	while (*times != ' ' && *times != '\n') times++;
+	while (*distances != ' ' && *distances != '\n') distances++;
 	while (*times != '\n' && *distances != '\n') {
-		while(*times == ' ') times++;
-		while(*distances == ' ') distances++;
+		while (*times == ' ') times++;
+		while (*distances == ' ') distances++;
 
 		races[n_races].time = atoi(times);
 		races[n_races].distance = atoi(distances);
 		n_races++;
 
-		while(*times != ' ' && *times != '\n') times++;
-		while(*distances != ' ' && *distances != '\n') distances++;
+		while (*times != ' ' && *times != '\n') times++;
+		while (*distances != ' ' && *distances != '\n') distances++;
 	}
-
 
 	int total = 1;
 	for (size_t i = 0; i < n_races; i++) {
@@ -42,13 +41,9 @@ static int solve(const char *input) {
 		for (int s = 0; s < r->time; s++) {
 			int t = r->time - s;
 			int d = s * t;
-			if (d > r->distance) {
-				n++;
-			}
+			if (d > r->distance) n++;
 		}
-		if (n) {
-			total *= n;
-		}
+		if (n) total *= n;
 	}
 
 	return total;

@@ -2,8 +2,6 @@
 #define MAX_SEEDS 32
 #define MAX_RANGES 64
 
-static const bool verbose = false;
-
 static const char *const example =
 	"seeds: 79 14 55 13\n"
 	"\n"
@@ -48,7 +46,7 @@ typedef struct {
 typedef struct {
 	const char *name;
 	size_t len;
-	Range ranges[MAX_RANGES];
+	Range mappings[MAX_RANGES];
 } Map;
 
 typedef struct {
@@ -60,20 +58,13 @@ typedef struct {
 typedef enum {
 	SEED_TITLE,
 	SEEDS,
-	FIND_MAP,
-	MAP_TITLE,
+	FIND_BLOCK,
+	BLOCK_TITLE,
 	RANGE_NEW,
 	RANGE_DST,
 	RANGE_SRC,
 	RANGE_LEN,
 } State;
-
-#define TRAN(S)                                                                \
-	do {                                                                   \
-		if (verbose)                                                   \
-			puts("\n\t> " #S);                                     \
-		state = (S);                                                   \
-	} while (0)
 
 static void parseAlmanac(char const *const input, Almanac *almanac) {
 	size_t n_maps = 0;
@@ -84,19 +75,15 @@ static void parseAlmanac(char const *const input, Almanac *almanac) {
 	Map *map = NULL;
 	Range *range = NULL;
 	for (char c; (c = *cursor); cursor++) {
-		if (verbose) {
-			putchar(c);
-		}
-
 		switch (state) {
 		case SEED_TITLE:
 			if (c == ':') {
-				TRAN(SEEDS);
+				state = SEEDS;
 			}
 			break;
 		case SEEDS:
 			if (c == '\n') {
-				TRAN(FIND_MAP);
+				state = FIND_BLOCK;
 				break;
 			}
 			if (c == ' ') {
@@ -106,37 +93,37 @@ static void parseAlmanac(char const *const input, Almanac *almanac) {
 			almanac->seeds[almanac->n_seeds - 1] *= 10;
 			almanac->seeds[almanac->n_seeds - 1] += (size_t)c - '0';
 			break;
-		case FIND_MAP:
+		case FIND_BLOCK:
 			if (c != '\n') {
 				map = &almanac->maps[n_maps++];
 				map->len = 0;
-				TRAN(MAP_TITLE);
+				state = BLOCK_TITLE;
 				break;
 			}
 			break;
-		case MAP_TITLE:
+		case BLOCK_TITLE:
 			if (c == '\n') {
-				TRAN(RANGE_NEW);
+				state = RANGE_NEW;
 			}
 			break;
 		case RANGE_NEW:
 			if (c == '\n') {
-				TRAN(FIND_MAP);
+				state = FIND_BLOCK;
 				break;
 			}
 
 			assert(map);
-			range = &map->ranges[map->len++];
+			range = &map->mappings[map->len++];
 
 			range->dst = (size_t)c - '0';
 			range->src = 0;
 			range->len = 0;
 
-			TRAN(RANGE_DST);
+			state = RANGE_DST;
 			break;
 		case RANGE_DST:
 			if (c == ' ') {
-				TRAN(RANGE_SRC);
+				state = RANGE_SRC;
 				break;
 			}
 			assert(range);
@@ -145,7 +132,7 @@ static void parseAlmanac(char const *const input, Almanac *almanac) {
 			break;
 		case RANGE_SRC:
 			if (c == ' ') {
-				TRAN(RANGE_LEN);
+				state = RANGE_LEN;
 				break;
 			}
 			assert(range);
@@ -154,7 +141,7 @@ static void parseAlmanac(char const *const input, Almanac *almanac) {
 			break;
 		case RANGE_LEN:
 			if (c == '\n') {
-				TRAN(RANGE_NEW);
+				state = RANGE_NEW;
 				break;
 			}
 			assert(range);
@@ -176,7 +163,7 @@ static void printAlmanac(Almanac *almanac) {
 		Map *map = &almanac->maps[i];
 		printf("  %s (%zu)\n", map->name, map->len);
 		for (size_t j = 0; j < map->len; j++) {
-			Range *range = &map->ranges[j];
+			Range *range = &map->mappings[j];
 			printf("    [%zu:%zu:%zu]\n", range->dst, range->src,
 			       range->len);
 		}
@@ -191,7 +178,7 @@ static size_t findLocation(Almanac *almanac) {
 		for (size_t j = 0; j < ASZ(almanac->maps); j++) {
 			Map *map = &almanac->maps[j];
 			for (size_t j = 0; j < map->len; j++) {
-				Range *range = &map->ranges[j];
+				Range *range = &map->mappings[j];
 				printf("%zu in [%zu:%zu:%zu]", next, range->dst,
 				       range->src, range->len);
 

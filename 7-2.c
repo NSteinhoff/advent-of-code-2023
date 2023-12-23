@@ -40,7 +40,7 @@ static const char *names[] = {
 
 typedef struct {
 	Type type;
-	uint bid;
+	u32 bid;
 	uchar cards[CARDS_IN_HAND];
 } Hand;
 
