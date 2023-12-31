@@ -1,8 +1,8 @@
 #pragma once
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <limits.h>
 
 #include <assert.h>
 
@@ -61,12 +61,12 @@ char *readToString(const char *restrict fname) {
 	if (bytes_read != bytes_to_read) {
 		if (feof(file))
 			fprintf(stderr,
-				"Expected to read %zu bytes, but read %zu\n",
-				bytes_to_read, bytes_read);
+			        "Expected to read %zu bytes, but read %zu\n",
+			        bytes_to_read, bytes_read);
 
 		if (ferror(file))
 			fprintf(stderr, "Could not read all bytes from %s\n",
-				fname);
+			        fname);
 
 		free(content);
 		return NULL;
