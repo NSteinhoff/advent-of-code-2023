@@ -15,6 +15,8 @@
 
 #define ASZ(A) sizeof(A) / sizeof(A[0])
 
+typedef size_t usize;
+typedef ptrdiff_t isize;
 typedef unsigned char uchar;
 
 typedef int8_t i8;
